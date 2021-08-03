@@ -1,0 +1,9 @@
+# IntelliJ's settings (Configurações locais da IDE IntelliJ's PyCharm)
+.idea
+
+# Virtual Environments (Ambientes Virtuais)
+venv
+env
+
+# Bytecodes
+__pycache__
