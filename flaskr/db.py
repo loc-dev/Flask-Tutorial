@@ -21,13 +21,28 @@ from flask.cli import with_appcontext
 # Estabelecendo a conexão com Banco de Dados, e, armazenando no objeto 'g'.
 def get_db():
     # Se o atributo 'db' não for encontrado no objeto 'g',
-    # será declarado um armazenando de dados da conexão deste objeto 'g' com atributo db,
+    # será declarado um armazenamento de dados da conexão deste objeto 'g' com atributo db,
     # sendo reutilizada nas próximas solicitações.
+    # Com a função '.connect()' do módulo sqlite3, podemos estabelecer a conexão com o arquivo de Banco de Dados SQLite,
+    # no momento, não se encontra disponível, até que seja inicializado o Banco de Dados.
+    # O 'current_app', direciona tratando da solicitação atual dada a configuração da aplicação que foi estabelecida na função 'create_app',
+    # quando a função 'get_db' for chamada, o aplicativo estará processando uma solicitação, sendo assim, a função 'current_app' passa a ser usada.
     if 'db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
             detect_types=sqlite3.PARSE_DECLTYPES
         )
+        # A classe .Row do módulo sqlite3, retorna linhas em comportamento de Estrutura de Dados - Dicionário [dict],
+        # permitindo acessar as colunas por nome.
         g.db.row_factory = sqlite3.Row
 
     return g.db
+
+# Primeiramente a funação 'close_db', irá verificar a conexão e se o atributo db foi estabelecido no objeto 'g'
+def close_db(e=None):
+    # Logo, se a conexão estiver estabelecida, poderá ser desconectada, também podemos usar a função 'close_db',
+    # na nossa Fábrica de Aplicativos, após cada solicitação ao Banco de dados
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
