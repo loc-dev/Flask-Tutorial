@@ -25,8 +25,9 @@ def get_db():
     # sendo reutilizada nas próximas solicitações.
     # Com a função '.connect()' do módulo sqlite3, podemos estabelecer a conexão com o arquivo de Banco de Dados SQLite,
     # no momento, não se encontra disponível, até que seja inicializado o Banco de Dados.
-    # O 'current_app', direciona tratando da solicitação atual dada a configuração da aplicação que foi estabelecida na função 'create_app',
-    # quando a função 'get_db' for chamada, o aplicativo estará processando uma solicitação, sendo assim, a função 'current_app' passa a ser usada.
+    # O 'current_app', direciona tratando da solicitação atual dada a configuração da aplicação,
+    # que foi estabelecida na função 'create_app', quando a função 'get_db' for chamada,
+    # o aplicativo estará processando uma solicitação, sendo assim, a função 'current_app' passa a ser usada.
     if 'db' not in g:
         g.db = sqlite3.connect(
             current_app.config['DATABASE'],
@@ -38,11 +39,36 @@ def get_db():
 
     return g.db
 
-# Primeiramente a funação 'close_db', irá verificar a conexão e se o atributo db foi estabelecido no objeto 'g'
+# Primeiramente a função 'close_db', irá verificar a conexão e se o atributo db foi estabelecido no objeto 'g'
 def close_db(e=None):
     # Logo, se a conexão estiver estabelecida, poderá ser desconectada, também podemos usar a função 'close_db',
-    # na nossa Fábrica de Aplicativos, após cada solicitação ao Banco de dados
+    # na nossa Fábrica de Aplicativos, após cada solicitação ao Banco de dados.
     db = g.pop('db', None)
 
     if db is not None:
         db.close()
+
+# Inicializando o Banco de Dados
+def init_db():
+    # Chamando a função 'get_db', sendo aplicada na variável db
+    db = get_db()
+    # Com a função '.open_resource()', podemos abrir um arquivo relativo ao Pacote flaskr
+    with current_app.open_resource('schema.sql') as f:
+        db.executescript(f.read().decode('utf-8'))
+
+# Utilizando a função 'command' estamos adicionando uma linha de comando chamado 'init-db', que chama a função 'init_db'
+# Depois, temos o decorador que está envolvendo chamada a função 'init_db' garantindo dentro do Contexto de Aplicativo
+@click.command('init-db')
+@with_appcontext
+def init_db_command():
+    init_db()
+    click.echo('Initialized the database.')
+
+# Registrando as seguinte funções 'close_db' e 'init_db_command' para o Aplicativo,
+# o certo seria realizar a instância do aplicativo, como está indisponível, vamos escrever uma função,
+# e definir no parâmetro [app] nossa variável.
+def init_app(app):
+    # Registrando a função assim que o Contexto de Aplicativo estiver sendo solicitado.
+    app.teardown_appcontext(close_db)
+    # Adicionando um novo comando juntamente com o comando flask.
+    app.cli.add_command(init_db_command)
