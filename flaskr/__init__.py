@@ -58,4 +58,8 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
 
+    # Importando o Blueprint 'auth' da raíz do pacote flaskr
+    from . import auth
+    app.register_blueprint(auth.bp)
+
     return app
