@@ -112,3 +112,21 @@ def login():
 
     return render_template('auth/login.html')
 
+# Com o user['id'] armazenado em um session, ele estará disponível nas solicitações subsequentes, vejamos essa função.
+# Nessa função 'load_logged_in_user', o Blueprint possui a função que é executada antes de uma função de visualização,
+# ou até fora do Blueprint, não importando qual foi a solicitação de uma URL.
+# O 'load_logged_in_user', receberá o user['id'] armazenado em uma session, atribui para uma variável user_id,
+# Se não houver um session armazenado com user['id'], o objeto 'g' será atribuído um valor None, caso contrário,
+# O método .execute(), realizará uma consulta desse usuário específico, posteriormente, armazenando em um objeto 'g',
+# com atributo user.
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = get_db().execute(
+            "SELECT * FROM user WHERE id = ?", (user_id,)
+        ).fetchone()
+
