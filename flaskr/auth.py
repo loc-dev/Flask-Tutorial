@@ -130,3 +130,27 @@ def load_logged_in_user():
             "SELECT * FROM user WHERE id = ?", (user_id,)
         ).fetchone()
 
+# Nessa visualização a função 'logout', o usuário encerrará seu acesso ao aplicativo flaskr.
+# A URL especificada será um conjunto da url_prefix: '/auth' + o decorador route() da Blueprint '/logout'.
+@bp.route('/logout')
+def logout():
+    # No momento, o objeto session, está sendo utilizado para limpar o armazenamento do user['id'].
+    # Sendo assim, a função 'load_logged_in_user', não será mais carregará para solicitações subsequentes.
+    session.clear()
+
+    return redirect(url_for('index'))
+
+# Essa função 'login_required', será usada para exigir autenticação em outras visualizações.
+def login_required(view):
+    # Com o decorador, estamos chamando uma nova função de visualização, no primeiro momento será feito uma validação.
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        # Condição aqui é para validar se o usuário está logado, ou seja, através da função 'load_logged_in_user' pelo objeto 'g'
+        # seu atributo user. Caso seja verdadeira a condição, o usuário será redirecionado para página de Login.
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+
+        # Se o usuário estiver carregado, a visualização original será chamada e continua em funcionamento normalmente.
+        return view(**kwargs)
+
+    return wrapped_view
