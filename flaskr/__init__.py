@@ -62,4 +62,13 @@ def create_app(test_config=None):
     from . import auth
     app.register_blueprint(auth.bp)
 
+    # Importando o Blueprint 'blog' da raíz do pacote flaskr
+    from . import blog
+    app.register_blueprint(blog.bp)
+    # O subdomínio de URL associados ao Blueprint 'blog', deverá ser feito através da função 'add_url_rule'.
+    # O funcionamento é semelhante de decorador route(), mas, iremos, aplicar um nome ao endpoint,
+    # neste caso, o 'index' para que haja uma associação entre a Linha 141 da Blueprint 'auth',
+    # com o url_for('blog.index'). Logo, o 'index' visualização será um índice principal (" / ") - Sem parênteses.
+    app.add_url_rule('/', endpoint='index')
+
     return app
