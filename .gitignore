@@ -7,3 +7,6 @@ env
 
 # Bytecodes
 __pycache__
+
+# Configs
+instance
