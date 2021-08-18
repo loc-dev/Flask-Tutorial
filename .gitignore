@@ -10,3 +10,10 @@ __pycache__
 
 # Configs
 instance
+
+# Tests
+.coverage
+htmlcov
+
+# Distribution
+*.egg-info
